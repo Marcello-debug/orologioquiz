@@ -1,0 +1,23 @@
+{
+  "name": "Orologio Quiz - Impara l'Ora",
+  "short_name": "Quiz Ora",
+  "description": "Un quiz divertente per imparare a leggere l'orologio analogico.",
+  "start_url": "/orologioquiz/OrologioQuiz.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "/orologioquiz/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/orologioquiz/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "scope": "/orologioquiz/"
+}

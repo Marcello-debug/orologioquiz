@@ -1,0 +1,538 @@
+<!DOCTYPE:html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orologio Quiz - Impara l'Orologio Analogico</title>
+    
+    <!-- Caricamento di Tailwind CSS per uno stile moderno e responsive (Richiede Connessione Internet) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Stile di base del quadrante dell'orologio */
+        .clock {
+            --clock-size: 300px; /* Variabile per la dimensione principale */
+            width: var(--clock-size);
+            height: var(--clock-size);
+            border: 12px solid #333;
+            border-radius: 50%;
+            position: relative;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin: 0 auto;
+            top: 0;
+            left: 0;
+        }
+
+        /* Stile delle lancette */
+        .hand {
+            position: absolute;
+            transform-origin: bottom center; 
+            background: currentColor;
+            border-radius: 5px;
+            left: 50%;
+            bottom: 50%; 
+            margin-left: -2px; 
+            /* La transizione definisce l'animazione di rotazione */
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        /* Lancetta delle ore */
+        #hour-hand {
+            width: 8px;
+            height: 70px;
+            z-index: 10;
+            margin-left: -4px;
+        }
+
+        /* Lancetta dei minuti */
+        #minute-hand {
+            width: 6px;
+            height: 110px;
+            z-index: 20;
+            margin-left: -3px;
+        }
+
+        /* Punto centrale */
+        .center-dot {
+            width: 16px;
+            height: 16px;
+            background: #e91e63;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 30;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* POSIZIONAMENTO DEI NUMERI E DEI SEGNI ORARI */
+        .hour-number-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            transform: translate(-50%, -50%); 
+        }
+
+        .hour-number {
+            position: absolute;
+            width: 30px; 
+            height: 30px; 
+            text-align: center;
+            line-height: 30px;
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            transform-origin: 0 0; 
+        }
+
+        /* Stile per i segni dei minuti/ore (Ticks) */
+        .tick-mark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: 0 0;
+            width: 2px;
+            height: 8px;
+            background-color: #aaa;
+        }
+
+        .tick-mark.minute {
+            width: 1px;
+            height: 4px;
+            background-color: #ccc;
+        }
+
+        .tick-mark.hour {
+            width: 3px;
+            height: 10px;
+            background-color: #666;
+        }
+
+        /* Animazione per il Cuore di Ricompensa */
+        /* Utilizziamo variabili CSS per la scala dinamica */
+        @keyframes pop-in {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(var(--pop-scale, 2.0)) rotate(-15deg); opacity: 1; } 
+            100% { transform: translate(-50%, -50%) scale(var(--final-scale, 1.5)) rotate(0deg); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(var(--final-scale, 1.5)); }
+            50% { transform: translate(-50%, -50%) scale(calc(var(--final-scale, 1.5) + 0.15)); }
+            100% { transform: translate(-50%, -50%) scale(var(--final-scale, 1.5)); }
+        }
+
+        #reward-heart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120px; 
+            height: 120px;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 50;
+            color: #ef4444; /* Rosso vibrante di Tailwind */
+            display: none;
+        }
+
+        #reward-heart.show {
+            display: block;
+            /* L'animazione utilizzerà le variabili --pop-scale e --final-scale impostate in JS */
+            animation: pop-in 0.5s ease-out forwards, pulse 1.5s infinite 0.5s;
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .clock {
+                --clock-size: 250px;
+                border-width: 8px;
+            }
+            .hour-number { font-size: 18px; width: 25px; height: 25px; line-height: 25px;}
+            #hour-hand { height: 60px; }
+            #minute-hand { height: 90px; }
+            /* Anche sul mobile lo rendiamo più grande */
+            #reward-heart { width: 100px; height: 100px; } 
+        }
+
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 font-sans">
+
+    <div class="bg-white p-6 md:p-10 rounded-xl shadow-2xl max-w-md w-full">
+        <!-- Titolo aggiornato a Orologio Quiz -->
+        <h1 class="text-3xl font-bold text-center text-indigo-700 mb-6">Orologio Quiz</h1>
+        <p class="text-center text-gray-600 mb-6">
+            Indovina l'ora. Corrette consecutive: <span id="correct-count" class="font-bold text-indigo-600">0</span>
+        </p>
+
+        <!-- Contenitore dell'Orologio -->
+        <div class="clock">
+            <!-- SVG del Cuore (Ricompensa) -->
+            <svg id="reward-heart" class="" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+            </svg>
+            
+            <!-- Contenitore dinamico per segni e numeri -->
+            <div id="clock-face-marks" class="hour-number-container">
+                <!-- Segni delle ore e dei minuti verranno generati qui via JS -->
+            </div>
+            
+            <!-- Lancetta delle Ore (Marrone) -->
+            <div id="hour-hand" class="hand bg-amber-900 shadow-md"></div>
+            <!-- Lancetta dei Minuti (Blu) -->
+            <div id="minute-hand" class="hand bg-blue-600 shadow-md"></div>
+            <!-- Punto centrale -->
+            <div class="center-dot"></div>
+        </div>
+
+        <!-- Interfaccia di Gioco -->
+        <div class="mt-8">
+            <!-- Testo etichetta semplificato -->
+            <label class="block text-lg font-medium text-gray-700 mb-2">Qual è l'ora esatta? (Ora e Minuti)</label>
+            
+            <div class="flex flex-col gap-3">
+                <div class="flex gap-2 items-center justify-center">
+                    <!-- Input Ore -->
+                    <input type="number" id="hour-guess" placeholder="HH" min="0" max="24" 
+                           class="w-1/2 p-3 border-2 border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-center text-3xl font-bold"
+                           aria-label="Input per le Ore">
+                    
+                    <span class="text-3xl font-bold text-gray-600">:</span>
+                    
+                    <!-- Input Minuti -->
+                    <input type="number" id="minute-guess" placeholder="MM" min="0" max="55" step="5"
+                           class="w-1/2 p-3 border-2 border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-center text-3xl font-bold"
+                           aria-label="Input per i Minuti">
+                </div>
+                
+                <button onclick="checkGuess()" 
+                        id="check-guess-btn"
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-150 ease-in-out">
+                    Verifica
+                </button>
+            </div>
+            
+            <!-- Tasto "Mi Arrendo" -->
+            <button onclick="showSolution()" 
+                    id="show-solution-btn"
+                    class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-150 ease-in-out mt-3">
+                Mi Arrendo (Mostra Soluzione)
+            </button>
+
+
+            <!-- Area di Feedback e Risultato -->
+            <div id="feedback" class="mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px]">
+                <!-- Il feedback verrà mostrato qui -->
+            </div>
+            
+            <!-- Pulsante per Nuova Sfida -->
+            <button onclick="newChallenge()" 
+                    id="new-challenge-btn"
+                    class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-150 ease-in-out hidden mt-4">
+                Nuova Sfida
+            </button>
+            
+        </div>
+    </div>
+
+    <!-- Logica dell'App (SCRIPT NORMALE - ESECUZIONE GARANTITA) -->
+    <script>
+        // Stato del Gioco
+        // La variabile correctHour conterrà un valore da 1 a 12 (l'ora visualizzata sul quadrante).
+        let correctHour = 0; 
+        let correctMinute = 0;
+        let consecutiveCorrectAnswers = 0; 
+
+        // Elementi DOM (Recuperati all'avvio)
+        let hourHand, minuteHand, feedbackDiv, hourGuessInput, minuteGuessInput, newChallengeBtn, clockFaceMarks, clock, showSolutionBtn, correctCountSpan, rewardHeart;
+
+        // Funzione per disegnare le lancette
+        function renderClock(h, m) {
+            // Calcola la rotazione della lancetta dei minuti: 6 gradi per minuto (360/60)
+            const minuteRotation = m * 6;
+            
+            // Calcola la rotazione della lancetta delle ore
+            // L'orologio mostra sempre l'ora in formato 12 ore, quindi usiamo h % 12
+            const hourRotation = (h % 12) * 30 + (m / 60) * 30;
+
+            hourHand.style.transform = `rotate(${hourRotation}deg)`;
+            minuteHand.style.transform = `rotate(${minuteRotation}deg)`;
+        }
+
+        // Aggiorna il contatore nella UI
+        function updateCorrectCount() {
+            if (correctCountSpan) {
+                correctCountSpan.textContent = consecutiveCorrectAnswers;
+            }
+        }
+
+        // Funzione per generare i segni delle ore e dei minuti
+        function generateClockFace() {
+            if (!clockFaceMarks || !clock) return;
+
+            clockFaceMarks.innerHTML = ''; 
+
+            let radius = 135; 
+            if (clock.offsetWidth <= 250) {
+                 radius = 110;
+            }
+
+            for (let i = 1; i <= 60; i++) {
+                const angle = i * 6; 
+                const isHourMark = i % 5 === 0;
+                const tickMark = document.createElement('div');
+                tickMark.className = `tick-mark absolute`;
+                
+                tickMark.style.transform = `rotate(${angle - 90}deg) translateY(-${radius}px)`; 
+                tickMark.style.transformOrigin = '0 0';
+                
+                if (isHourMark) {
+                    tickMark.classList.add('hour');
+                    
+                    const hour = (i / 5 === 0) ? 12 : (i / 5);
+                    const hourNumber = document.createElement('div');
+                    hourNumber.textContent = hour;
+                    hourNumber.className = 'hour-number absolute';
+                    
+                    const numberRadius = radius - 20;
+
+                    const normalizedAngle = (i === 60 ? 0 : angle) - 90;
+                    const rad = normalizedAngle * (Math.PI / 180);
+
+                    const x = numberRadius * Math.cos(rad);
+                    const y = numberRadius * Math.sin(rad);
+
+                    hourNumber.style.left = `calc(50% + ${x}px)`;
+                    hourNumber.style.top = `calc(50% + ${y}px)`;
+                    hourNumber.style.transform = 'translate(-50%, -50%)'; 
+
+                    clockFaceMarks.appendChild(hourNumber);
+                } else {
+                    tickMark.classList.add('minute');
+                }
+                
+                clockFaceMarks.appendChild(tickMark);
+            }
+        }
+
+        // Funzione per generare un'ora casuale
+        function generateRandomTime() {
+            // LOGICA DI NASCONDERE IL CUORE: il cuore scompare alla nuova sfida
+            if (rewardHeart) {
+                rewardHeart.classList.remove('show');
+                // Rimuove le variabili di scala personalizzate
+                rewardHeart.style.removeProperty('--pop-scale');
+                rewardHeart.style.removeProperty('--final-scale');
+            }
+            
+            // Genera un'ora casuale da 1 a 12 (corrisponde all'ora sul quadrante)
+            const h = Math.floor(Math.random() * 12) + 1; 
+            const m = Math.floor(Math.random() * 12) * 5; 
+
+            correctHour = h; // correctHour rimane 1-12
+            correctMinute = m;
+
+            // Uso di setTimeout(0) per garantire che l'animazione CSS venga applicata
+            setTimeout(() => {
+                renderClock(h, m);
+            }, 0);
+            
+            // Resetta l'interfaccia
+            if (hourGuessInput) hourGuessInput.value = ''; 
+            if (minuteGuessInput) minuteGuessInput.value = ''; 
+            
+            if (feedbackDiv) {
+                feedbackDiv.textContent = 'Concentrati sulle lancette!';
+                feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-gray-200 text-gray-700';
+            }
+            if (newChallengeBtn) newChallengeBtn.classList.add('hidden');
+            if (hourGuessInput) hourGuessInput.disabled = false; 
+            if (minuteGuessInput) minuteGuessInput.disabled = false; 
+            if (showSolutionBtn) showSolutionBtn.classList.remove('hidden'); 
+        }
+
+        /**
+         * Normalizza l'ora indovinata in formato 12 ore per la verifica.
+         * Esempio: 13 -> 1, 24 -> 12, 0 -> 12, 5 -> 5.
+         * @param {number} hour24 L'ora indovinata (0-24).
+         * @returns {number} L'ora normalizzata (1-12).
+         */
+        function normalizeTo12Hour(hour24) {
+             // Se l'ora è 24 o 0 (entrambe mezzanotte), corrisponde a 12 sul quadrante.
+             if (hour24 === 24 || hour24 === 0) return 12;
+             
+             // Se l'ora è maggiore di 12 (pomeriggio/sera), sottrai 12.
+             if (hour24 > 12) return hour24 - 12;
+
+             // Altrimenti è l'ora del mattino (1-12), che corrisponde all'ora sul quadrante.
+             return hour24;
+        }
+
+        // Funzione per verificare l'ipotesi dell'utente
+        window.checkGuess = function() {
+            if (!hourGuessInput || !minuteGuessInput) return; 
+
+            const hourInput = hourGuessInput.value.trim();
+            const minuteInput = minuteGuessInput.value.trim();
+
+            if (!hourGuessInput.disabled) { 
+                
+                if (hourInput === '' || minuteInput === '') {
+                    feedbackDiv.textContent = 'Per favore, inserisci sia l\'ora che i minuti.';
+                    feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-yellow-100 text-yellow-800';
+                    return;
+                }
+
+                let guessedHour24 = parseInt(hourInput, 10);
+                const guessedMinute = parseInt(minuteInput, 10);
+
+                // Controllo validità input esteso a 0-24 ore
+                if (isNaN(guessedHour24) || guessedHour24 < 0 || guessedHour24 > 24 || 
+                    isNaN(guessedMinute) || guessedMinute < 0 || guessedMinute > 59 || guessedMinute % 5 !== 0) {
+                     
+                     feedbackDiv.textContent = 'Valori non validi. Ore (0-24), Minuti (solo multipli di 5, 00, 05, ..., 55).';
+                     feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-yellow-100 text-yellow-800';
+                     return;
+                }
+
+                // Gestione del caso limite: 24:XX non è valido, ma 24:00 è accettato. 
+                if (guessedHour24 === 24 && guessedMinute !== 0) {
+                     feedbackDiv.textContent = 'L\'ora 24 è accettata solo per 24:00 (mezzanotte). Per gli altri minuti usa 00:XX.';
+                     feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-yellow-100 text-yellow-800';
+                     return;
+                }
+                
+                const normalizedGuessedHour = normalizeTo12Hour(guessedHour24);
+                
+                if (normalizedGuessedHour === correctHour && guessedMinute === correctMinute) {
+                    
+                    // LOGICA DI SUCCESSO
+                    consecutiveCorrectAnswers++; 
+                    updateCorrectCount();
+
+                    // Controllo del reward dinamico (multipli di 10 fino a 100)
+                    const isMilestone = consecutiveCorrectAnswers > 0 && 
+                                         consecutiveCorrectAnswers % 10 === 0 && 
+                                         consecutiveCorrectAnswers <= 100;
+                    
+                    if (isMilestone) {
+                         const level = consecutiveCorrectAnswers / 10; // Livello 1 per 10, Livello 10 per 100
+                         
+                         // Scala crescente: da 1.5 a 4.0
+                         // Base 1.5 + (Livello - 1) * 0.25
+                         const finalScale = 1.5 + ((level - 1) * 0.25);
+                         const popScale = finalScale + 0.5;
+
+                         // Applica le variabili CSS per controllare la dimensione dell'animazione
+                         rewardHeart.style.setProperty('--pop-scale', popScale);
+                         rewardHeart.style.setProperty('--final-scale', finalScale);
+                         
+                         rewardHeart.classList.add('show'); 
+                         
+                         feedbackDiv.textContent = `⭐ Complimenti! Hai raggiunto ${consecutiveCorrectAnswers} risposte esatte di fila! Il cuore è enorme! ⭐`; 
+                         
+                    } else {
+                        // Se non è una milestone, assicurati che il cuore sia nascosto
+                        if (rewardHeart) rewardHeart.classList.remove('show');
+                        
+                        const displayHour24 = guessedHour24; 
+                        feedbackDiv.textContent = `🎉 Corretto! L'ora è ${displayHour24.toString().padStart(2, '0')}:${correctMinute.toString().padStart(2, '0')}. Ottimo lavoro!`; 
+                    }
+                    
+                    feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-green-100 text-green-700 border-2 border-green-500';
+                    hourGuessInput.disabled = true;
+                    minuteGuessInput.disabled = true;
+                    newChallengeBtn.classList.remove('hidden');
+                    showSolutionBtn.classList.add('hidden');
+                    
+                } else {
+                    // LOGICA DI FALLIMENTO
+                    consecutiveCorrectAnswers = 0; 
+                    updateCorrectCount();
+                    
+                    // Nascondi il cuore in caso di fallimento
+                    if (rewardHeart) rewardHeart.classList.remove('show'); 
+                    
+                    const guessedTimeStr = `${guessedHour24.toString().padStart(2, '0')}:${guessedMinute.toString().padStart(2, '0')}`;
+                    feedbackDiv.textContent = `❌ Sbagliato. Hai provato ${guessedTimeStr}. Riprova!`;
+                    feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-red-100 text-red-700 border-2 border-red-500';
+                }
+            }
+        }
+
+        // FUNZIONE: Mostra la soluzione
+        window.showSolution = function() {
+            consecutiveCorrectAnswers = 0; 
+            updateCorrectCount();
+            
+            // Nascondi il cuore
+            if (rewardHeart) rewardHeart.classList.remove('show'); 
+
+            const correctTimeStr12 = `${correctHour.toString().padStart(2, '0')}:${correctMinute.toString().padStart(2, '0')}`;
+            
+            let primarySolution24h = '';
+            
+            if (correctHour === 12 && correctMinute === 0) {
+                primarySolution24h = '00:00 (o 24:00)';
+            } else if (correctHour === 12) {
+                 primarySolution24h = `12:${correctMinute.toString().padStart(2, '0')}`;
+            } else if (correctHour < 12) {
+                const isMorning = Math.random() < 0.5;
+                const hour24 = isMorning ? correctHour : correctHour + 12;
+                primarySolution24h = `${hour24.toString().padStart(2, '0')}:${correctMinute.toString().padStart(2, '0')}`;
+            }
+
+            feedbackDiv.textContent = `🕰️ La soluzione è: ${correctTimeStr12} (12h) oppure ${primarySolution24h} (24h). Riprova!`;
+            feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-red-200 text-red-800 border-2 border-red-600';
+
+            if (hourGuessInput) hourGuessInput.disabled = true; 
+            if (minuteGuessInput) minuteGuessInput.disabled = true; 
+            if (newChallengeBtn) newChallengeBtn.classList.remove('hidden');
+            if (showSolutionBtn) showSolutionBtn.classList.add('hidden'); 
+        }
+
+        // Funzione per iniziare una nuova sfida
+        window.newChallenge = function() {
+            generateRandomTime();
+        }
+
+        // INIZIALIZZAZIONE DOM COMPLETA
+        window.onload = function() {
+            // Recupera gli elementi DOM una sola volta al caricamento completo
+            hourHand = document.getElementById('hour-hand');
+            minuteHand = document.getElementById('minute-hand');
+            feedbackDiv = document.getElementById('feedback');
+            hourGuessInput = document.getElementById('hour-guess');
+            minuteGuessInput = document.getElementById('minute-guess');
+            newChallengeBtn = document.getElementById('new-challenge-btn');
+            clockFaceMarks = document.getElementById('clock-face-marks');
+            clock = document.querySelector('.clock');
+            showSolutionBtn = document.getElementById('show-solution-btn');
+            correctCountSpan = document.getElementById('correct-count');
+            rewardHeart = document.getElementById('reward-heart');
+
+            // Avvia il gioco
+            generateClockFace(); 
+            generateRandomTime();
+            updateCorrectCount();
+            
+            // Gestione del tasto Invio (Enter) per verificare l'ipotesi
+            const handleEnterKey = function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); 
+                    window.checkGuess();
+                }
+            };
+            
+            if(hourGuessInput) hourGuessInput.addEventListener('keypress', handleEnterKey);
+            if(minuteGuessInput) minuteGuessInput.addEventListener('keypress', handleEnterKey);
+        };
+        
+        // Rigenera i segni se la finestra viene ridimensionata per mantenere la responsività
+        window.addEventListener('resize', generateClockFace);
+    </script>
+</body>
+</html>
