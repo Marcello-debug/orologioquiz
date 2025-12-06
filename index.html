@@ -480,8 +480,7 @@
             } else if (correctHour === 12) {
                  primarySolution24h = `12:${correctMinute.toString().padStart(2, '0')}`;
             } else if (correctHour < 12) {
-                const isMorning = Math.random() < 0.5;
-                const hour24 = isMorning ? correctHour : correctHour + 12;
+                const hour24 = correctHour + 12;
                 primarySolution24h = `${hour24.toString().padStart(2, '0')}:${correctMinute.toString().padStart(2, '0')}`;
             }
 
