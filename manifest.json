@@ -2,7 +2,7 @@
   "name": "Orologio Quiz - Impara l'Ora",
   "short_name": "Quiz Ora",
   "description": "Un quiz divertente per imparare a leggere l'orologio analogico.",
-  "start_url": "/orologioquiz/OrologioQuiz.html",
+  "start_url": "/orologioquiz/index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
