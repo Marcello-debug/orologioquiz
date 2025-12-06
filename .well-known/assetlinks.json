@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.tuodominio.orologioquiz",
+      "sha256_cert_fingerprints": [
+        "INSERISCI_SHA256_DEL_TUO_KEYSTORE"
+      ]
+    }
+  }
+]
