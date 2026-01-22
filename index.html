@@ -1,14 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Orologio Quiz - Impara l'Orologio Analogico</title>
-
   <!-- Tailwind CSS (Richiede connessione Internet) -->
   <script src="https://cdn.tailwindcss.com"></script>
-
   <style>
     /* Stile di base del quadrante dell'orologio */
     .clock {
@@ -24,7 +21,6 @@
       top: 0;
       left: 0;
     }
-
     /* Stile delle lancette */
     .hand {
       position: absolute;
@@ -37,7 +33,6 @@
       /* La transizione definisce l'animazione di rotazione */
       transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
     }
-
     /* Lancetta delle ore */
     #hour-hand {
       width: 8px;
@@ -45,7 +40,6 @@
       z-index: 10;
       margin-left: -4px;
     }
-
     /* Lancetta dei minuti */
     #minute-hand {
       width: 6px;
@@ -53,7 +47,6 @@
       z-index: 20;
       margin-left: -3px;
     }
-
     /* Punto centrale */
     .center-dot {
       width: 16px;
@@ -67,7 +60,6 @@
       z-index: 30;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     }
-
     /* POSIZIONAMENTO DEI NUMERI E DEI SEGNI ORARI */
     .hour-number-container {
       position: absolute;
@@ -88,7 +80,6 @@
       color: #333;
       transform-origin: 0 0;
     }
-
     /* Stile per i segni dei minuti/ore (Ticks) */
     .tick-mark {
       position: absolute;
@@ -109,7 +100,6 @@
       height: 10px;
       background-color: #666;
     }
-
     /* Animazione per il Cuore di Ricompensa */
     @keyframes pop-in {
       0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
@@ -117,8 +107,8 @@
       100% { transform: translate(-50%, -50%) scale(var(--final-scale, 1.5)) rotate(0deg); opacity: 1; }
     }
     @keyframes pulse {
-      0%   { transform: translate(-50%, -50%) scale(var(--final-scale, 1.5)); }
-      50%  { transform: translate(-50%, -50%) scale(calc(var(--final-scale, 1.5) + 0.15)); }
+      0% { transform: translate(-50%, -50%) scale(var(--final-scale, 1.5)); }
+      50% { transform: translate(-50%, -50%) scale(calc(var(--final-scale, 1.5) + 0.15)); }
       100% { transform: translate(-50%, -50%) scale(var(--final-scale, 1.5)); }
     }
     #reward-heart {
@@ -137,7 +127,6 @@
       /* L'animazione utilizzerà le variabili --pop-scale e --final-scale impostate in JS */
       animation: pop-in 0.5s ease-out forwards, pulse 1.5s infinite 0.5s;
     }
-
     /* Responsive adjustments */
     @media (max-width: 640px) {
       .clock {
@@ -154,10 +143,14 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4 font-sans">
   <div class="bg-white p-6 md:p-10 rounded-xl shadow-2xl max-w-md w-full">
-    <h1 class="text-3xl font-bold text-center text-indigo-700 mb-6">Orologio Quiz</h1>
-    <p class="text-center text-gray-600 mb-6">
-      Indovina l'ora. Corrette consecutive: <span id="correct-count" class="font-bold text-indigo-600">0</span>
+    <h1 class="text-3xl font-bold text-center text-indigo-700 mb-3">Orologio Quiz</h1>
+    <p class="text-center text-gray-600 mb-3">
+      Risposte corrette consecutive: <span id="correct-count" class="font-bold text-indigo-600">0</span>
     </p>
+
+    <div id="feedback" role="status" aria-live="polite" class="mb-3 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-gray-100 text-gray-800 border border-gray-200"></div>
+
+    <label class="block text-lg font-medium text-gray-700 mb-5">Qual è l'ora esatta? (Ora e Minuti)</label>
 
     <!-- Contenitore dell'Orologio -->
     <div class="clock">
@@ -180,9 +173,7 @@
     </div>
 
     <!-- Interfaccia di Gioco -->
-    <div class="mt-8">
-      <label class="block text-lg font-medium text-gray-700 mb-2">Qual è l'ora esatta? (Ora e Minuti)</label>
-
+    <div class="mt-4">
       <div class="flex flex-col gap-3">
         <div class="flex gap-2 items-center justify-center">
           <!-- Input Ore: text + inputmode numeric per mostrare zeri iniziali -->
@@ -195,9 +186,7 @@
             maxlength="2"
             class="w-1/2 p-3 border-2 border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-center text-3xl font-bold"
             aria-label="Input per le Ore">
-
           <span class="text-3xl font-bold text-gray-600">:</span>
-
           <!-- Input Minuti: number con step=5 per multipli di 5 -->
           <input
             type="number"
@@ -209,7 +198,6 @@
             class="w-1/2 p-3 border-2 border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-center text-3xl font-bold"
             aria-label="Input per i Minuti">
         </div>
-
         <button onclick="checkGuess()"
                 id="check-guess-btn"
                 class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-150 ease-in-out">
@@ -223,11 +211,6 @@
               class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-150 ease-in-out mt-3">
         Mi Arrendo (Mostra Soluzione)
       </button>
-
-      <!-- Area di Feedback e Risultato -->
-      <div id="feedback" class="mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px]">
-        <!-- Il feedback verrà mostrato qui -->
-      </div>
 
       <!-- Pulsante per Nuova Sfida -->
       <button onclick="newChallenge()"
@@ -250,10 +233,32 @@
     let hourHand, minuteHand, feedbackDiv, hourGuessInput, minuteGuessInput,
         newChallengeBtn, clockFaceMarks, clock, showSolutionBtn, correctCountSpan, rewardHeart;
 
+    // ===== Helper colori feedback (palette semantica) =====
+    function setFeedback(state, message) {
+      if (!feedbackDiv) return;
+
+      // Base
+      const base = "mb-3 p-4 rounded-lg text-center font-semibold min-h-[50px]";
+
+      const palettes = {
+        info:      "bg-blue-50 text-blue-800 border border-blue-200",
+        success:   "bg-green-50 text-green-800 border border-green-200",
+        error:     "bg-red-50 text-red-800 border border-red-200",
+        warning:   "bg-amber-50 text-amber-900 border border-amber-200",
+        solution:  "bg-indigo-50 text-indigo-900 border border-indigo-200",
+        milestone: "bg-fuchsia-50 text-fuchsia-900 border border-fuchsia-200",
+        neutral:   "bg-gray-100 text-gray-800 border border-gray-200"
+      };
+
+      const palette = palettes[state] || palettes.neutral;
+      feedbackDiv.className = `${base} ${palette}`;
+      feedbackDiv.textContent = message;
+    }
+
     // Funzione per disegnare le lancette
     function renderClock(h, m) {
-      const minuteRotation = m * 6;           // 6° per minuto
-      const hourRotation = (h % 12) * 30 + (m / 60) * 30;  // ore + frazione minuti
+      const minuteRotation = m * 6; // 6° per minuto
+      const hourRotation = (h % 12) * 30 + (m / 60) * 30; // ore + frazione minuti
       hourHand.style.transform = `rotate(${hourRotation}deg)`;
       minuteHand.style.transform = `rotate(${minuteRotation}deg)`;
     }
@@ -269,12 +274,10 @@
     function generateClockFace() {
       if (!clockFaceMarks || !clock) return;
       clockFaceMarks.innerHTML = '';
-
       let radius = 135;
       if (clock.offsetWidth <= 250) {
         radius = 110;
       }
-
       for (let i = 1; i <= 60; i++) {
         const angle = i * 6;
         const isHourMark = i % 5 === 0;
@@ -282,30 +285,24 @@
         tickMark.className = `tick-mark absolute`;
         tickMark.style.transform = `rotate(${angle - 90}deg) translateY(-${radius}px)`;
         tickMark.style.transformOrigin = '0 0';
-
         if (isHourMark) {
           tickMark.classList.add('hour');
-
           const hour = (i / 5 === 0) ? 12 : (i / 5);
           const hourNumber = document.createElement('div');
           hourNumber.textContent = hour;
           hourNumber.className = 'hour-number absolute';
-
           const numberRadius = radius - 20;
           const normalizedAngle = (i === 60 ? 0 : angle) - 90;
           const rad = normalizedAngle * (Math.PI / 180);
           const x = numberRadius * Math.cos(rad);
           const y = numberRadius * Math.sin(rad);
-
           hourNumber.style.left = `calc(50% + ${x}px)`;
           hourNumber.style.top = `calc(50% + ${y}px)`;
           hourNumber.style.transform = 'translate(-50%, -50%)';
-
           clockFaceMarks.appendChild(hourNumber);
         } else {
           tickMark.classList.add('minute');
         }
-
         clockFaceMarks.appendChild(tickMark);
       }
     }
@@ -318,22 +315,17 @@
         rewardHeart.style.removeProperty('--pop-scale');
         rewardHeart.style.removeProperty('--final-scale');
       }
-
-      const h = Math.floor(Math.random() * 12) + 1;   // 1–12
-      const m = Math.floor(Math.random() * 12) * 5;   // 0,5,10,...,55
-
+      const h = Math.floor(Math.random() * 12) + 1; // 1–12
+      const m = Math.floor(Math.random() * 12) * 5; // 0,5,10,...,55
       correctHour = h;
       correctMinute = m;
-
       // Applica l'animazione
       setTimeout(() => { renderClock(h, m); }, 0);
-
       // Reset UI
       if (hourGuessInput) hourGuessInput.value = '';
       if (minuteGuessInput) minuteGuessInput.value = '';
       if (feedbackDiv) {
-        feedbackDiv.textContent = 'Concentrati sulle lancette!';
-        feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-gray-200 text-gray-700';
+        setFeedback('info', 'Concentrati sulle lancette!');
       }
       if (newChallengeBtn) newChallengeBtn.classList.add('hidden');
       if (hourGuessInput) hourGuessInput.disabled = false;
@@ -362,8 +354,7 @@
 
       if (!hourGuessInput.disabled) {
         if (hourInput === '' || minuteInput === '') {
-          feedbackDiv.textContent = 'Per favore, inserisci sia l\'ora che i minuti.';
-          feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-yellow-100 text-yellow-800';
+          setFeedback('warning', 'Per favore, inserisci sia l\'ora che i minuti.');
           return;
         }
 
@@ -374,15 +365,13 @@
         if (isNaN(guessedHour24) || guessedHour24 < 0 || guessedHour24 > 24 ||
             isNaN(guessedMinute) || guessedMinute < 0 || guessedMinute > 59 ||
             guessedMinute % 5 !== 0) {
-          feedbackDiv.textContent = 'Valori non validi. Ore (0–24), Minuti (solo multipli di 5: 00, 05, ..., 55).';
-          feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-yellow-100 text-yellow-800';
+          setFeedback('error', 'Valori non validi. Ore (0–24), Minuti (solo multipli di 5: 00, 05, ..., 55).');
           return;
         }
 
         // Caso limite: 24:XX non è valido, ma 24:00 è accettato
         if (guessedHour24 === 24 && guessedMinute !== 0) {
-          feedbackDiv.textContent = 'L\'ora 24 è accettata solo per 24:00 (mezzanotte). Per gli altri minuti usa 00:XX.';
-          feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-yellow-100 text-yellow-800';
+          setFeedback('warning', 'L\'ora 24 è accettata solo per 24:00 (mezzanotte). Per gli altri minuti usa 00:XX.');
           return;
         }
 
@@ -404,14 +393,13 @@
             rewardHeart.style.setProperty('--pop-scale', popScale);
             rewardHeart.style.setProperty('--final-scale', finalScale);
             rewardHeart.classList.add('show');
-            feedbackDiv.textContent = `⭐ Complimenti! Hai raggiunto ${consecutiveCorrectAnswers} risposte esatte di fila! Il cuore è enorme! ⭐`;
+            setFeedback('milestone', `⭐ Complimenti! Hai raggiunto ${consecutiveCorrectAnswers} risposte esatte di fila! Il cuore è enorme! ⭐`);
           } else {
             if (rewardHeart) rewardHeart.classList.remove('show');
             const displayHour24 = guessedHour24;
-            feedbackDiv.textContent = `🎉 Corretto! L'ora è ${displayHour24.toString().padStart(2, '0')}:${correctMinute.toString().padStart(2, '0')}. Ottimo lavoro!`;
+            setFeedback('success', `🎉 Corretto! L'ora è ${displayHour24.toString().padStart(2, '0')}:${correctMinute.toString().padStart(2, '0')}. Ottimo lavoro!`);
           }
 
-          feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-green-100 text-green-700 border-2 border-green-500';
           hourGuessInput.disabled = true;
           minuteGuessInput.disabled = true;
           newChallengeBtn.classList.remove('hidden');
@@ -421,10 +409,8 @@
           consecutiveCorrectAnswers = 0;
           updateCorrectCount();
           if (rewardHeart) rewardHeart.classList.remove('show');
-
           const guessedTimeStr = `${guessedHour24.toString().padStart(2, '0')}:${guessedMinute.toString().padStart(2, '0')}`;
-          feedbackDiv.textContent = `❌ Sbagliato. Hai provato ${guessedTimeStr}. Riprova!`;
-          feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-red-100 text-red-700 border-2 border-red-500';
+          setFeedback('error', `❌ Sbagliato. Hai provato ${guessedTimeStr}. Riprova!`);
         }
       }
     };
@@ -437,7 +423,6 @@
 
       const correctTimeStr12 = `${correctHour.toString().padStart(2, '0')}:${correctMinute.toString().padStart(2, '0')}`;
       let primarySolution24h = '';
-
       if (correctHour === 12 && correctMinute === 0) {
         primarySolution24h = '00:00 (o 24:00)';
       } else if (correctHour === 12) {
@@ -446,9 +431,7 @@
         const hour24 = correctHour + 12;
         primarySolution24h = `${hour24.toString().padStart(2, '0')}:${correctMinute.toString().padStart(2, '0')}`;
       }
-
-      feedbackDiv.textContent = `🕰️ La soluzione è: ${correctTimeStr12} (12h) oppure ${primarySolution24h} (24h). Riprova!`;
-      feedbackDiv.className = 'mt-4 p-4 rounded-lg text-center font-semibold min-h-[50px] bg-red-200 text-red-800 border-2 border-red-600';
+      setFeedback('solution', `🕰️ La soluzione è: ${correctTimeStr12} (12h) oppure ${primarySolution24h} (24h). Riprova!`);
 
       if (hourGuessInput) hourGuessInput.disabled = true;
       if (minuteGuessInput) minuteGuessInput.disabled = true;
@@ -492,12 +475,10 @@
         hourGuessInput.addEventListener('input', function () {
           // manteniamo solo cifre
           let raw = hourGuessInput.value.replace(/\D+/g, '');
-
           if (raw.length === 0) {
             hourGuessInput.value = '';
             return;
           }
-
           if (raw.length === 1) {
             const d = raw[0];
             // se prima cifra è 3-9 -> auto-pad e passa ai minuti
