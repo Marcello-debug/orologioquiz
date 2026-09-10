@@ -1,6 +1,6 @@
 
-const CACHE_NAME = 'orologioquiz-ghp-v1';
-const ASSETS = ["/orologioquiz/", "/orologioquiz/OrologioQuiz.html", "/orologioquiz/manifest.json", "/orologioquiz/images/icon-192.png", "/orologioquiz/images/icon-512.png", "/orologioquiz/images/icon-maskable-192.png", "/orologioquiz/images/icon-maskable-512.png", "/orologioquiz/images/favicon-16.png", "/orologioquiz/images/favicon-32.png", "/orologioquiz/images/favicon.ico"];
+const CACHE_NAME = 'orologioquiz-ghp-v2';
+const ASSETS = ["/orologioquiz/", "/orologioquiz/Index.html", "/orologioquiz/manifest.json", "/orologioquiz/images/icon-192.png", "/orologioquiz/images/icon-512.png", "/orologioquiz/images/icon-maskable-192.png", "/orologioquiz/images/icon-maskable-512.png", "/orologioquiz/images/favicon-16.png", "/orologioquiz/images/favicon-32.png", "/orologioquiz/images/favicon.ico"];
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
